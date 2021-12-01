@@ -212,6 +212,18 @@ public class LauncherFrame extends JFrame {
             popup.add(menuItem);
 
             if (selected.isLocal()) {
+                menuItem = new JMenuItem(tr("instance.optionalFeatures"));
+                menuItem.addActionListener(new ActionListener()
+                {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        OptionalFeaturesDialogueOpener thread = new OptionalFeaturesDialogueOpener(selected);
+                        thread.start();
+                    }
+                });
+                popup.add(menuItem);
+
                 popup.addSeparator();
 
                 menuItem = new JMenuItem(SharedLocale.tr("instance.openFolder"));
