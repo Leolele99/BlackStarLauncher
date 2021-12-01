@@ -90,6 +90,7 @@ public class FeatureSelectionDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 synchronized (receiver) {
                     receiver.notifyAll();
+                    System.out.println(receiver.getClass().toString());
                 }
                 FeatureSelectionDialog.this.dispose();
             }
