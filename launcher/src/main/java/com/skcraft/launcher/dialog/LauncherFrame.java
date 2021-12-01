@@ -55,6 +55,7 @@ public class LauncherFrame extends JFrame {
     private final JButton optionsButton = new JButton(SharedLocale.tr("launcher.options"));
     private final JButton selfUpdateButton = new JButton(SharedLocale.tr("launcher.updateLauncher"));
     private final JCheckBox updateCheck = new JCheckBox(SharedLocale.tr("launcher.downloadUpdates"));
+    private final JCheckBox showConsole = new JCheckBox(SharedLocale.tr("launcher.showConsole"));
 
     /**
      * Create a new frame.
@@ -102,6 +103,8 @@ public class LauncherFrame extends JFrame {
         });
 
         updateCheck.setSelected(true);
+        showConsole.setSelected(false);
+
         instancesTable.setModel(instancesModel);
         launchButton.setFont(launchButton.getFont().deriveFont(Font.BOLD));
         splitPane.setDividerLocation(200);
@@ -111,6 +114,7 @@ public class LauncherFrame extends JFrame {
         SwingHelper.flattenJSplitPane(splitPane);
         container.add(refreshButton);
         container.add(updateCheck);
+        container.add(showConsole);
         container.add(selfUpdateButton);
         container.add(optionsButton);
         container.add(launchButton);
@@ -356,6 +360,7 @@ public class LauncherFrame extends JFrame {
 
     private void launch() {
         boolean permitUpdate = updateCheck.isSelected();
+        boolean permitConsole = showConsole.isSelected();
         Instance instance = launcher.getInstances().get(instancesTable.getSelectedRow());
 
         LaunchOptions options = new LaunchOptions.Builder()
@@ -363,6 +368,7 @@ public class LauncherFrame extends JFrame {
                 .setListener(new LaunchListenerImpl(this))
                 .setUpdatePolicy(permitUpdate ? UpdatePolicy.UPDATE_IF_SESSION_ONLINE : UpdatePolicy.NO_UPDATE)
                 .setWindow(this)
+                .setShowConsole(permitConsole)
                 .build();
         launcher.getLaunchSupervisor().launch(options);
     }

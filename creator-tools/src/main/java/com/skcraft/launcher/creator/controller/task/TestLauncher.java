@@ -54,6 +54,7 @@ public class TestLauncher implements Function<InstanceList, Instance>, ProgressO
                     .setUpdatePolicy(UpdatePolicy.ALWAYS_UPDATE)
                     .setWindow(window)
                     .setSession(session)
+                    .setShowConsole(true)
                     .build();
 
             launcher.getLaunchSupervisor().launch(options);
