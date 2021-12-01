@@ -1,8 +1,16 @@
-SKCraft Launcher
+SKCraft Launcher - Leo's Jank Version
 ================
+This is the original SK Launcher, but it provides some additional Janky edits, that allow the following features over the original:
+-"Show Console" Checkbox. Disabled by default, this feature hides or shows the background console.
+-You can now righclick any installed modpack to change its optional features without having to start it.
 
-![Now with 1.13+ support!](readme/now_with_support.png)
+Bugs so far:
+-As "Show Console" is disabled by default, it automatically disables the default console that is opened when no game is open.
+-As consoles are not closed by default, after the game is closed, the launch will acquire a collection of invisible consoles over time, which can be destroyed by restarting the launcher.
 
+
+
+Original Readme:
 [![Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/offbeatwitch/donate)
 
 *If you rely on this software, please consider [donating](https://liberapay.com/offbeatwitch/donate) to help keep it maintained!*
