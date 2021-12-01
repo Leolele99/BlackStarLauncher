@@ -28,9 +28,11 @@ public class LaunchProcessHandler implements Function<Process, ProcessConsoleFra
 
     private final Launcher launcher;
     private ProcessConsoleFrame consoleFrame;
+    private final LaunchOptions options;
 
-    public LaunchProcessHandler(@NonNull Launcher launcher) {
+    public LaunchProcessHandler(@NonNull Launcher launcher,   @NonNull LaunchOptions options) {
         this.launcher = launcher;
+        this.options = options;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class LaunchProcessHandler implements Function<Process, ProcessConsoleFra
                 public void run() {
                     consoleFrame = new ProcessConsoleFrame(CONSOLE_NUM_LINES, true);
                     consoleFrame.setProcess(process);
-                    consoleFrame.setVisible(true);
+                    consoleFrame.setVisible(options.isShowConsole());
                     MessageLog messageLog = consoleFrame.getMessageLog();
                     messageLog.consume(process.getInputStream());
                     messageLog.consume(process.getErrorStream());

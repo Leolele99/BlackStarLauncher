@@ -100,7 +100,7 @@ public class LaunchSupervisor {
                 Futures.addCallback(future, new FutureCallback<Instance>() {
                     @Override
                     public void onSuccess(Instance result) {
-                        launch(window, instance, session, listener);
+                        launch(window, instance, session, listener, options);
                     }
 
                     @Override
@@ -108,14 +108,14 @@ public class LaunchSupervisor {
                     }
                 }, SwingExecutor.INSTANCE);
             } else {
-                launch(window, instance, session, listener);
+                launch(window, instance, session, listener, options);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             SwingHelper.showErrorDialog(window, SharedLocale.tr("launcher.noInstanceError"), SharedLocale.tr("launcher.noInstanceTitle"));
         }
     }
 
-    private void launch(Window window, Instance instance, Session session, final LaunchListener listener) {
+    private void launch(Window window, Instance instance, Session session, final LaunchListener listener, LaunchOptions options) {
         final File extractDir = launcher.createExtractDir();
 
         // Get the process
@@ -146,7 +146,7 @@ public class LaunchSupervisor {
 
         // Watch the created process
         ListenableFuture<?> future = Futures.transform(
-                processFuture, new LaunchProcessHandler(launcher), launcher.getExecutor());
+                processFuture, new LaunchProcessHandler(launcher, options), launcher.getExecutor());
         SwingHelper.addErrorDialogCallback(null, future);
 
         // Clean up at the very end
