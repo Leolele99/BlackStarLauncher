@@ -8,9 +8,11 @@ package com.skcraft.launcher.bootstrap;
 
 import com.skcraft.launcher.Bootstrap;
 import lombok.extern.java.Log;
+import net.lingala.zip4j.ZipFile;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import javax.sound.midi.MidiFileFormat;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
@@ -62,11 +64,26 @@ public class Downloader implements Runnable, ProgressObservable {
         });
 
         URL updateUrl = HttpRequest.url(bootstrap.getProperties().getProperty("latestUrl"));
+        URL javaUrl = HttpRequest.url(bootstrap.getProperties().getProperty("javaUrl"));
 
         log.info("Reading update URL " + updateUrl + "...");
         List<LauncherBinary> binaries = new ArrayList<LauncherBinary>();
 
         try {
+            //Downloading Java
+            File tempJava = new File(bootstrap.getBaseDir() + "/java", "jre_temp.zip");
+            tempJava.getParentFile().mkdirs();
+            tempJava.createNewFile();
+            httpRequest = HttpRequest.get(javaUrl);
+            httpRequest
+                    .execute()
+                    .expectResponseCode(200)
+                    .saveContent(tempJava);
+            //ExtractZip
+            new ZipFile(tempJava).extractAll(bootstrap.getBaseDir() + "/java");
+            tempJava.delete();
+
+            //Downloading Launcher
             String data = HttpRequest
                     .get(updateUrl)
                     .execute()

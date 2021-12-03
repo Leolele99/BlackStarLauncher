@@ -23,7 +23,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
+
 
 /**
  * A dialog to modify configuration options.
@@ -77,7 +82,12 @@ public class ConfigurationDialog extends JDialog {
         setResizable(false);
         setLocationRelativeTo(owner);
 
-        JavaRuntime[] javaRuntimes = JavaRuntimeFinder.getAvailableRuntimes().toArray(new JavaRuntime[0]);
+        List<JavaRuntime> javaRuntimesTemp = JavaRuntimeFinder.getAvailableRuntimes();
+        //JavaRuntime javaRuntime = JavaRuntimeFinder.getRuntimeFromPath(launcher.getJavaDir().getAbsolutePath());
+        JavaRuntime javaRuntime = new JavaRuntime(Paths.get(launcher.getJavaDir().getAbsolutePath()).toFile(), "Bundled", true);
+        javaRuntime.setMinecraftBundled(true);
+        javaRuntimesTemp.add(0, javaRuntime);
+        JavaRuntime[] javaRuntimes = javaRuntimesTemp.toArray(new JavaRuntime[0]);
         DefaultComboBoxModel<JavaRuntime> model = new DefaultComboBoxModel<>(javaRuntimes);
 
         // Put the runtime from the config in the model if it isn't

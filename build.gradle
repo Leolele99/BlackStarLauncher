@@ -27,7 +27,7 @@ subprojects {
     apply plugin: 'maven'
 
     group = 'com.skcraft'
-    version = '4.6-SNAPSHOT'
+    version = '0.0.6'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -48,6 +48,8 @@ subprojects {
         workingDir.mkdirs()
     }
 }
+
+
 
 task clean {
     subprojects {

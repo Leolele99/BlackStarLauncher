@@ -110,7 +110,7 @@ public class LauncherFrame extends JFrame {
         splitPane.setDividerLocation(200);
         splitPane.setDividerSize(4);
         splitPane.setOpaque(false);
-        container.add(splitPane, "grow, wrap, span 5, gapbottom unrel, w null:680, h null:350");
+        container.add(splitPane, "grow, wrap, span , gapbottom unrel, w null:680, h null:350");
         SwingHelper.flattenJSplitPane(splitPane);
         container.add(refreshButton);
         container.add(updateCheck);
