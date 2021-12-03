@@ -130,6 +130,8 @@ public final class Launcher {
         if (config.getMaxMemory() <= 0 || configMax >= available - 1) {
             config.setMaxMemory((int) (suggestedMax * 1024));
         }
+
+        config.setJvmPath(this.getJavaDir().getAbsolutePath());
     }
 
     /**
@@ -187,6 +189,15 @@ public final class Launcher {
      */
     public File getInstancesDir() {
         return new File(getBaseDir(), "instances");
+    }
+
+    /**
+     * Get the directory containing the java.exe.
+     *
+     * @return the java dir
+     */
+    public File getJavaDir() {
+        return new File(getBaseDir(), "java/jdk-16.0.1/bin");
     }
 
     /**
