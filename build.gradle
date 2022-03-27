@@ -49,8 +49,6 @@ subprojects {
     }
 }
 
-
-
 task clean {
     subprojects {
         rootProject.clean.dependsOn tasks.matching { it.name == "clean" }
