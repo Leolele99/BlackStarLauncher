@@ -76,7 +76,7 @@ public class ConfigurationDialog extends JDialog {
 
         List<JavaRuntime> javaRuntimesTemp = JavaRuntimeFinder.getAvailableRuntimes();
         //JavaRuntime javaRuntime = JavaRuntimeFinder.getRuntimeFromPath(launcher.getJavaDir().getAbsolutePath());
-        JavaRuntime javaRuntime = new JavaRuntime(Paths.get(launcher.getJavaDir().getAbsolutePath()).toFile(), "Bundled", true);
+        JavaRuntime javaRuntime = new JavaRuntime(Paths.get(launcher.getJavaDir().getAbsolutePath()).toFile(), "Bundled (17.0.2)", true);
         javaRuntime.setMinecraftBundled(true);
         javaRuntimesTemp.add(0, javaRuntime);
         JavaRuntime[] javaRuntimes = javaRuntimesTemp.toArray(new JavaRuntime[0]);

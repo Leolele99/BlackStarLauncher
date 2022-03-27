@@ -94,6 +94,11 @@ public class ProcessConsoleFrame extends ConsoleFrame {
         super.performClose();
     }
 
+    public void outsideClose() {
+        //eh
+        performClose();
+    }
+
     private void performKill() {
         if (!confirmKill()) {
             return;

@@ -61,6 +61,7 @@ public class LaunchProcessHandler implements Function<Process, ProcessConsoleFra
         }
 
         log.info("Process ended, re-showing launcher...");
+        consoleFrame.outsideClose();
 
         // Restore the launcher
         SwingUtilities.invokeLater(new Runnable() {

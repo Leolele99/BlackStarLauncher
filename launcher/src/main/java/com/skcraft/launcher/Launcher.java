@@ -197,7 +197,7 @@ public final class Launcher {
      * @return the java dir
      */
     public File getJavaDir() {
-        return new File(getBaseDir(), "java/jdk-16.0.1/bin");
+        return new File(getBaseDir(), "java/jdk-17.0.2");
     }
 
     /**

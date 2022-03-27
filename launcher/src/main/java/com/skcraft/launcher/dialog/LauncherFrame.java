@@ -14,6 +14,7 @@ import com.skcraft.launcher.launch.LaunchListener;
 import com.skcraft.launcher.launch.LaunchOptions;
 import com.skcraft.launcher.launch.LaunchOptions.UpdatePolicy;
 import com.skcraft.launcher.swing.*;
+import com.skcraft.launcher.util.LauncherOptions;
 import com.skcraft.launcher.util.SharedLocale;
 import com.skcraft.launcher.util.SwingExecutor;
 import lombok.Getter;
@@ -39,9 +40,11 @@ import static com.skcraft.launcher.util.SharedLocale.tr;
  * The main launcher frame.
  */
 @Log
-public class LauncherFrame extends JFrame {
+public class LauncherFrame extends JFrame
+{
 
     private final Launcher launcher;
+    private final LauncherOptions launcherOptions;
 
     @Getter
     private final InstanceTable instancesTable = new InstanceTable();
@@ -62,11 +65,13 @@ public class LauncherFrame extends JFrame {
      *
      * @param launcher the launcher
      */
-    public LauncherFrame(@NonNull Launcher launcher) {
+    public LauncherFrame(@NonNull Launcher launcher)
+    {
         super(tr("launcher.title", launcher.getVersion()));
 
         this.launcher = launcher;
         instancesModel = new InstanceTableModel(launcher.getInstances());
+        this.launcherOptions = new LauncherOptions(launcher);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(400, 300));
@@ -76,15 +81,18 @@ public class LauncherFrame extends JFrame {
 
         SwingHelper.setFrameIcon(this, Launcher.class, "icon.png");
 
-        SwingUtilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 loadInstances();
             }
         });
     }
 
-    private void initComponents() {
+    private void initComponents()
+    {
         JPanel container = createContainerPanel();
         container.setLayout(new MigLayout("fill, insets dialog", "[][]push[][]", "[grow][]"));
 
@@ -92,18 +100,21 @@ public class LauncherFrame extends JFrame {
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, instanceScroll, webView);
         selfUpdateButton.setVisible(launcher.getUpdateManager().getPendingUpdate());
 
-        launcher.getUpdateManager().addPropertyChangeListener(new PropertyChangeListener() {
+        launcher.getUpdateManager().addPropertyChangeListener(new PropertyChangeListener()
+        {
             @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if (evt.getPropertyName().equals("pendingUpdate")) {
+            public void propertyChange(PropertyChangeEvent evt)
+            {
+                if (evt.getPropertyName().equals("pendingUpdate"))
+                {
                     selfUpdateButton.setVisible((Boolean) evt.getNewValue());
 
                 }
             }
         });
 
-        updateCheck.setSelected(true);
-        showConsole.setSelected(false);
+        updateCheck.setSelected(launcherOptions.isUpdateModpack());
+        showConsole.setSelected(launcherOptions.isShowConsole());
 
         instancesTable.setModel(instancesModel);
         launchButton.setFont(launchButton.getFont().deriveFont(Font.BOLD));
@@ -121,10 +132,13 @@ public class LauncherFrame extends JFrame {
 
         add(container, BorderLayout.CENTER);
 
-        instancesModel.addTableModelListener(new TableModelListener() {
+        instancesModel.addTableModelListener(new TableModelListener()
+        {
             @Override
-            public void tableChanged(TableModelEvent e) {
-                if (instancesTable.getRowCount() > 0) {
+            public void tableChanged(TableModelEvent e)
+            {
+                if (instancesTable.getRowCount() > 0)
+                {
                     instancesTable.setRowSelectionInterval(0, 0);
                 }
             }
@@ -132,42 +146,53 @@ public class LauncherFrame extends JFrame {
 
         instancesTable.addMouseListener(new DoubleClickToButtonAdapter(launchButton));
 
-        refreshButton.addActionListener(new ActionListener() {
+        refreshButton.addActionListener(new ActionListener()
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e)
+            {
                 loadInstances();
                 launcher.getUpdateManager().checkForUpdate();
                 webView.browse(launcher.getNewsURL(), false);
             }
         });
 
-        selfUpdateButton.addActionListener(new ActionListener() {
+        selfUpdateButton.addActionListener(new ActionListener()
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e)
+            {
                 launcher.getUpdateManager().performUpdate(LauncherFrame.this);
             }
         });
 
-        optionsButton.addActionListener(new ActionListener() {
+        optionsButton.addActionListener(new ActionListener()
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e)
+            {
                 showOptions();
             }
         });
 
-        launchButton.addActionListener(new ActionListener() {
+        launchButton.addActionListener(new ActionListener()
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e)
+            {
                 launch();
             }
         });
 
-        instancesTable.addMouseListener(new PopupMouseAdapter() {
+        instancesTable.addMouseListener(new PopupMouseAdapter()
+        {
             @Override
-            protected void showPopup(MouseEvent e) {
+            protected void showPopup(MouseEvent e)
+            {
                 int index = instancesTable.rowAtPoint(e.getPoint());
                 Instance selected = null;
-                if (index >= 0) {
+                if (index >= 0)
+                {
                     instancesTable.setRowSelectionInterval(index, index);
                     selected = launcher.getInstances().get(index);
                 }
@@ -176,7 +201,8 @@ public class LauncherFrame extends JFrame {
         });
     }
 
-    protected JPanel createContainerPanel() {
+    protected JPanel createContainerPanel()
+    {
         return new JPanel();
     }
 
@@ -185,7 +211,8 @@ public class LauncherFrame extends JFrame {
      *
      * @return the news panel
      */
-    protected WebpagePanel createNewsPanel() {
+    protected WebpagePanel createNewsPanel()
+    {
         return WebpagePanel.forURL(launcher.getNewsURL(), false);
     }
 
@@ -193,25 +220,30 @@ public class LauncherFrame extends JFrame {
      * Popup the menu for the instances.
      *
      * @param component the component
-     * @param x mouse X
-     * @param y mouse Y
-     * @param selected the selected instance, possibly null
+     * @param x         mouse X
+     * @param y         mouse Y
+     * @param selected  the selected instance, possibly null
      */
-    private void popupInstanceMenu(Component component, int x, int y, final Instance selected) {
+    private void popupInstanceMenu(Component component, int x, int y, final Instance selected)
+    {
         JPopupMenu popup = new JPopupMenu();
         JMenuItem menuItem;
 
-        if (selected != null) {
+        if (selected != null)
+        {
             menuItem = new JMenuItem(!selected.isLocal() ? tr("instance.install") : tr("instance.launch"));
-            menuItem.addActionListener(new ActionListener() {
+            menuItem.addActionListener(new ActionListener()
+            {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void actionPerformed(ActionEvent e)
+                {
                     launch();
                 }
             });
             popup.add(menuItem);
 
-            if (selected.isLocal()) {
+            if (selected.isLocal())
+            {
                 menuItem = new JMenuItem(tr("instance.optionalFeatures"));
                 menuItem.addActionListener(new ActionListener()
                 {
@@ -247,9 +279,11 @@ public class LauncherFrame extends JFrame {
                 popup.add(menuItem);
 
                 menuItem = new JMenuItem(SharedLocale.tr("instance.copyAsPath"));
-                menuItem.addActionListener(new ActionListener() {
+                menuItem.addActionListener(new ActionListener()
+                {
                     @Override
-                    public void actionPerformed(ActionEvent e) {
+                    public void actionPerformed(ActionEvent e)
+                    {
                         File dir = selected.getContentDir();
                         dir.mkdirs();
                         SwingHelper.setClipboard(dir.getAbsolutePath());
@@ -258,18 +292,22 @@ public class LauncherFrame extends JFrame {
                 popup.add(menuItem);
 
                 menuItem = new JMenuItem(SharedLocale.tr("instance.openSettings"));
-                menuItem.addActionListener(e -> {
+                menuItem.addActionListener(e ->
+                {
                     InstanceSettingsDialog.open(this, selected);
                 });
                 popup.add(menuItem);
 
                 popup.addSeparator();
 
-                if (!selected.isUpdatePending()) {
+                if (!selected.isUpdatePending())
+                {
                     menuItem = new JMenuItem(SharedLocale.tr("instance.forceUpdate"));
-                    menuItem.addActionListener(new ActionListener() {
+                    menuItem.addActionListener(new ActionListener()
+                    {
                         @Override
-                        public void actionPerformed(ActionEvent e) {
+                        public void actionPerformed(ActionEvent e)
+                        {
                             selected.setUpdatePending(true);
                             launch();
                             instancesModel.update();
@@ -279,18 +317,22 @@ public class LauncherFrame extends JFrame {
                 }
 
                 menuItem = new JMenuItem(SharedLocale.tr("instance.hardForceUpdate"));
-                menuItem.addActionListener(new ActionListener() {
+                menuItem.addActionListener(new ActionListener()
+                {
                     @Override
-                    public void actionPerformed(ActionEvent e) {
+                    public void actionPerformed(ActionEvent e)
+                    {
                         confirmHardUpdate(selected);
                     }
                 });
                 popup.add(menuItem);
 
                 menuItem = new JMenuItem(SharedLocale.tr("instance.deleteFiles"));
-                menuItem.addActionListener(new ActionListener() {
+                menuItem.addActionListener(new ActionListener()
+                {
                     @Override
-                    public void actionPerformed(ActionEvent e) {
+                    public void actionPerformed(ActionEvent e)
+                    {
                         confirmDelete(selected);
                     }
                 });
@@ -301,9 +343,11 @@ public class LauncherFrame extends JFrame {
         }
 
         menuItem = new JMenuItem(SharedLocale.tr("launcher.refreshList"));
-        menuItem.addActionListener(new ActionListener() {
+        menuItem.addActionListener(new ActionListener()
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e)
+            {
                 loadInstances();
             }
         });
@@ -313,48 +357,60 @@ public class LauncherFrame extends JFrame {
 
     }
 
-    private void confirmDelete(Instance instance) {
+    private void confirmDelete(Instance instance)
+    {
         if (!SwingHelper.confirmDialog(this,
-                tr("instance.confirmDelete", instance.getTitle()), SharedLocale.tr("confirmTitle"))) {
+                tr("instance.confirmDelete", instance.getTitle()), SharedLocale.tr("confirmTitle")))
+        {
             return;
         }
 
         ObservableFuture<Instance> future = launcher.getInstanceTasks().delete(this, instance);
 
         // Update the list of instances after updating
-        future.addListener(new Runnable() {
+        future.addListener(new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 loadInstances();
             }
         }, SwingExecutor.INSTANCE);
     }
 
-    private void confirmHardUpdate(Instance instance) {
-        if (!SwingHelper.confirmDialog(this, SharedLocale.tr("instance.confirmHardUpdate"), SharedLocale.tr("confirmTitle"))) {
+    private void confirmHardUpdate(Instance instance)
+    {
+        if (!SwingHelper.confirmDialog(this, SharedLocale.tr("instance.confirmHardUpdate"), SharedLocale.tr("confirmTitle")))
+        {
             return;
         }
 
         ObservableFuture<Instance> future = launcher.getInstanceTasks().hardUpdate(this, instance);
 
         // Update the list of instances after updating
-        future.addListener(new Runnable() {
+        future.addListener(new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 launch();
                 instancesModel.update();
             }
         }, SwingExecutor.INSTANCE);
     }
 
-    private void loadInstances() {
+    private void loadInstances()
+    {
         ObservableFuture<InstanceList> future = launcher.getInstanceTasks().reloadInstances(this);
 
-        future.addListener(new Runnable() {
+        future.addListener(new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 instancesModel.update();
-                if (instancesTable.getRowCount() > 0) {
+                if (instancesTable.getRowCount() > 0)
+                {
                     instancesTable.setRowSelectionInterval(0, 0);
                 }
                 requestFocus();
@@ -365,14 +421,22 @@ public class LauncherFrame extends JFrame {
         SwingHelper.addErrorDialogCallback(this, future);
     }
 
-    private void showOptions() {
+    private void showOptions()
+    {
         ConfigurationDialog configDialog = new ConfigurationDialog(this, launcher);
         configDialog.setVisible(true);
     }
 
-    private void launch() {
+    private void launch()
+    {
         boolean permitUpdate = updateCheck.isSelected();
         boolean permitConsole = showConsole.isSelected();
+
+        //save the settings
+        launcherOptions.setUpdateModpack(permitUpdate);
+        launcherOptions.setShowConsole(permitConsole);
+        launcherOptions.saveOptionsToFile();
+
         Instance instance = launcher.getInstances().get(instancesTable.getSelectedRow());
 
         LaunchOptions options = new LaunchOptions.Builder()
@@ -385,33 +449,40 @@ public class LauncherFrame extends JFrame {
         launcher.getLaunchSupervisor().launch(options);
     }
 
-    private static class LaunchListenerImpl implements LaunchListener {
+    private static class LaunchListenerImpl implements LaunchListener
+    {
         private final WeakReference<LauncherFrame> frameRef;
         private final Launcher launcher;
 
-        private LaunchListenerImpl(LauncherFrame frame) {
+        private LaunchListenerImpl(LauncherFrame frame)
+        {
             this.frameRef = new WeakReference<LauncherFrame>(frame);
             this.launcher = frame.launcher;
         }
 
         @Override
-        public void instancesUpdated() {
+        public void instancesUpdated()
+        {
             LauncherFrame frame = frameRef.get();
-            if (frame != null) {
+            if (frame != null)
+            {
                 frame.instancesModel.update();
             }
         }
 
         @Override
-        public void gameStarted() {
+        public void gameStarted()
+        {
             LauncherFrame frame = frameRef.get();
-            if (frame != null) {
+            if (frame != null)
+            {
                 frame.dispose();
             }
         }
 
         @Override
-        public void gameClosed() {
+        public void gameClosed()
+        {
             launcher.showLauncherWindow();
         }
     }
