@@ -6,11 +6,13 @@
 
 package com.skcraft.launcher.launch.runtime;
 
+import com.skcraft.launcher.Launcher;
 import com.skcraft.launcher.model.minecraft.JavaVersion;
 import com.skcraft.launcher.util.Environment;
 import lombok.extern.java.Log;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
  */
 @Log
 public final class JavaRuntimeFinder {
+
+    public static File baseDir;
 
     private JavaRuntimeFinder() {
     }
@@ -48,7 +52,15 @@ public final class JavaRuntimeFinder {
         // Add extra runtimes
         entries.addAll(runtimeFinder.getExtraRuntimes());
 
-        return entries.stream().sorted().collect(Collectors.toList());
+        List<JavaRuntime> result = entries.stream().sorted().collect(Collectors.toList());
+
+        //Add the default runtime
+        File javaDir = new File(baseDir,"java/jdk-17.0.2");
+        JavaRuntime javaRuntime = new JavaRuntime(javaDir.getAbsoluteFile(), "17.0.2 (Bundled, 64-bit)", true);
+        javaRuntime.setMinecraftBundled(true);
+        result.add(0, javaRuntime);
+
+        return result;
     }
 
     /**

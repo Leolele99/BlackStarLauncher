@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.skcraft.launcher.auth.*;
 import com.skcraft.launcher.launch.LaunchSupervisor;
+import com.skcraft.launcher.launch.runtime.JavaRuntimeFinder;
 import com.skcraft.launcher.model.minecraft.Library;
 import com.skcraft.launcher.model.minecraft.VersionManifest;
 import com.skcraft.launcher.persistence.Persistence;
@@ -131,7 +132,11 @@ public final class Launcher {
             config.setMaxMemory((int) (suggestedMax * 1024));
         }
 
+        //Make Launcher use bundled
         config.setJvmPath(this.getJavaDir().getAbsolutePath());
+
+        //Give baseDir path to Runtime finder
+        JavaRuntimeFinder.baseDir = baseDir;
     }
 
     /**
@@ -197,7 +202,7 @@ public final class Launcher {
      * @return the java dir
      */
     public File getJavaDir() {
-        return new File(getBaseDir(), "java/jdk-17.0.2");
+        return new File(getBaseDir(),"java/jdk-17.0.2");
     }
 
     /**

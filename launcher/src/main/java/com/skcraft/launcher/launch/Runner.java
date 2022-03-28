@@ -45,7 +45,8 @@ import static com.skcraft.launcher.util.SharedLocale.tr;
  * Handles the launching of an instance.
  */
 @Log
-public class Runner implements Callable<Process>, ProgressObservable {
+public class Runner implements Callable<Process>, ProgressObservable
+{
 
     private ProgressObservable progress = new DefaultProgress(0, SharedLocale.tr("runner.preparing"));
 
@@ -54,7 +55,9 @@ public class Runner implements Callable<Process>, ProgressObservable {
     private final Instance instance;
     private final Session session;
     private final File extractDir;
-    @Getter @Setter private Environment environment = Environment.getInstance();
+    @Getter
+    @Setter
+    private Environment environment = Environment.getInstance();
 
     private VersionManifest versionManifest;
     private AssetsIndex assetsIndex;
@@ -67,13 +70,14 @@ public class Runner implements Callable<Process>, ProgressObservable {
     /**
      * Create a new instance launcher.
      *
-     * @param launcher the launcher
-     * @param instance the instance
-     * @param session the session
+     * @param launcher   the launcher
+     * @param instance   the instance
+     * @param session    the session
      * @param extractDir the directory to extract to
      */
     public Runner(@NonNull Launcher launcher, @NonNull Instance instance,
-                  @NonNull Session session, @NonNull File extractDir) {
+                  @NonNull Session session, @NonNull File extractDir)
+    {
         this.launcher = launcher;
         this.instance = instance;
         this.session = session;
@@ -86,17 +90,21 @@ public class Runner implements Callable<Process>, ProgressObservable {
      *
      * @return the JAR path
      */
-    private File getJarPath() {
+    private File getJarPath()
+    {
         File jarPath = instance.getCustomJarPath();
-        if (!jarPath.exists()) {
+        if (!jarPath.exists())
+        {
             jarPath = launcher.getJarPath(versionManifest);
         }
         return jarPath;
     }
 
     @Override
-    public Process call() throws Exception {
-        if (!instance.isInstalled()) {
+    public Process call() throws Exception
+    {
+        if (!instance.isInstalled())
+        {
             throw new LauncherException("Update required", SharedLocale.tr("runner.updateRequired"));
         }
 
@@ -109,14 +117,17 @@ public class Runner implements Callable<Process>, ProgressObservable {
 
         // Load assets index
         File assetsFile = assetsRoot.getIndexPath(versionManifest);
-        try {
+        try
+        {
             assetsIndex = mapper.readValue(assetsFile, AssetsIndex.class);
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e)
+        {
             instance.setInstalled(false);
             Persistence.commitAndForget(instance);
             throw new LauncherException("Missing assets index " + assetsFile.getAbsolutePath(),
                     tr("runner.missingAssetsIndex", instance.getTitle(), assetsFile.getAbsolutePath()));
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             instance.setInstalled(false);
             Persistence.commitAndForget(instance);
             throw new LauncherException("Corrupt assets index " + assetsFile.getAbsolutePath(),
@@ -124,11 +135,13 @@ public class Runner implements Callable<Process>, ProgressObservable {
         }
 
         // Copy over assets to the tree
-        try {
+        try
+        {
             AssetsRoot.AssetsTreeBuilder assetsBuilder = assetsRoot.createAssetsBuilder(versionManifest);
             progress = assetsBuilder;
             virtualAssetsDir = assetsBuilder.build();
-        } catch (LauncherException e) {
+        } catch (LauncherException e)
+        {
             instance.setInstalled(false);
             Persistence.commitAndForget(instance);
             throw e;
@@ -162,18 +175,22 @@ public class Runner implements Callable<Process>, ProgressObservable {
     /**
      * Call the manifest launch modifier.
      */
-    private void callLaunchModifier() {
+    private void callLaunchModifier()
+    {
         instance.modify(builder);
     }
 
     /**
      * Add platform-specific arguments.
      */
-    private void addPlatformArgs() {
+    private void addPlatformArgs()
+    {
         // Mac OS X arguments
-        if (getEnvironment().getPlatform() == Platform.MAC_OS_X) {
+        if (getEnvironment().getPlatform() == Platform.MAC_OS_X)
+        {
             File icnsPath = assetsIndex.getObjectPath(assetsRoot, "icons/minecraft.icns");
-            if (icnsPath != null) {
+            if (icnsPath != null)
+            {
                 builder.getFlags().add("-Xdock:icon=" + icnsPath.getAbsolutePath());
                 builder.getFlags().add("-Xdock:name=Minecraft");
             }
@@ -183,25 +200,32 @@ public class Runner implements Callable<Process>, ProgressObservable {
     /**
      * Add libraries.
      */
-    private void addLibraries() throws LauncherException {
+    private void addLibraries() throws LauncherException
+    {
         // Add libraries to classpath or extract the libraries as necessary
-        for (Library library : versionManifest.getLibraries()) {
-            if (!library.matches(environment)) {
+        for (Library library : versionManifest.getLibraries())
+        {
+            if (!library.matches(environment))
+            {
                 continue;
             }
 
             File path = new File(launcher.getLibrariesDir(), library.getPath(environment));
 
-            if (path.exists()) {
+            if (path.exists())
+            {
                 Library.Extract extract = library.getExtract();
-                if (extract != null) {
+                if (extract != null)
+                {
                     ZipExtract zipExtract = new ZipExtract(Files.asByteSource(path), extractDir);
                     zipExtract.setExclude(extract.getExclude());
                     zipExtract.run();
-                } else {
+                } else
+                {
                     builder.classPath(path);
                 }
-            } else {
+            } else
+            {
                 instance.setInstalled(false);
                 Persistence.commitAndForget(instance);
                 throw new LauncherException("Missing library " + library.getName(),
@@ -215,7 +239,8 @@ public class Runner implements Callable<Process>, ProgressObservable {
      *
      * @throws IOException on I/O error
      */
-    private void addJvmArgs() throws IOException, LauncherException {
+    private void addJvmArgs() throws IOException, LauncherException
+    {
         Optional<MemorySettings> memorySettings = Optional.ofNullable(instance.getSettings().getMemorySettings());
 
         int minMemory = memorySettings
@@ -228,23 +253,28 @@ public class Runner implements Callable<Process>, ProgressObservable {
 
         int permGen = config.getPermGen();
 
-        if (minMemory <= 0) {
+        if (minMemory <= 0)
+        {
             minMemory = 1024;
         }
 
-        if (maxMemory <= 0) {
+        if (maxMemory <= 0)
+        {
             maxMemory = 1024;
         }
 
-        if (permGen <= 0) {
+        if (permGen <= 0)
+        {
             permGen = 128;
         }
 
-        if (permGen <= 64) {
+        if (permGen <= 64)
+        {
             permGen = 64;
         }
 
-        if (minMemory > maxMemory) {
+        if (minMemory > maxMemory)
+        {
             maxMemory = minMemory;
         }
 
@@ -252,38 +282,77 @@ public class Runner implements Callable<Process>, ProgressObservable {
         builder.setMaxMemory(maxMemory);
         builder.setPermGen(permGen);
 
+
+        //Works like: InstanceRuntime > IdealRuntimeAccordingToMojang > General Launcher Runtime
+        /*
         JavaRuntime selectedRuntime = Optional.ofNullable(instance.getSettings().getRuntime())
                 .orElseGet(() -> Optional.ofNullable(versionManifest.getJavaVersion())
                         .flatMap(JavaRuntimeFinder::findBestJavaRuntime)
                         .orElse(config.getJavaRuntime())
                 );
 
+         */
+
+        //If there is an instance runtime, use it
+        //If not, use the mojang runtime, unless the launcher runtime is newer, or either is null
+        JavaRuntime selectedRuntime = instance.getSettings().getRuntime();
+        if (selectedRuntime == null)
+        {
+            JavaRuntime launcherRuntime = config.getJavaRuntime();
+            JavaRuntime mojangRuntime = JavaRuntimeFinder.findBestJavaRuntime(versionManifest.getJavaVersion()).orElse(null);
+
+            if (mojangRuntime == null)
+            {
+                selectedRuntime = launcherRuntime;
+            } else if (launcherRuntime == null)
+            {
+                selectedRuntime = mojangRuntime;
+            }
+            else
+            {
+                if (launcherRuntime.getMajorVersion() > mojangRuntime.getMajorVersion())
+                {
+                    selectedRuntime = launcherRuntime;
+                }
+                else
+                {
+                    selectedRuntime = mojangRuntime;
+                }
+            }
+        }
+
         // Builder defaults to the PATH `java` if the runtime is null
         builder.setRuntime(selectedRuntime);
 
         List<String> flags = builder.getFlags();
-        String[] rawJvmArgsList = new String[] {
+        String[] rawJvmArgsList = new String[]{
                 config.getJvmArgs(),
                 instance.getSettings().getCustomJvmArgs()
         };
 
-        for (String rawJvmArgs : rawJvmArgsList) {
-            if (!Strings.isNullOrEmpty(rawJvmArgs)) {
+        for (String rawJvmArgs : rawJvmArgsList)
+        {
+            if (!Strings.isNullOrEmpty(rawJvmArgs))
+            {
                 flags.addAll(JavaProcessBuilder.splitArgs(rawJvmArgs));
             }
         }
 
         List<GameArgument> javaArguments = versionManifest.getArguments().getJvmArguments();
         StrSubstitutor substitutor = new StrSubstitutor(getCommandSubstitutions());
-        for (GameArgument arg : javaArguments) {
-            if (arg.shouldApply(environment, featureList)) {
-                for (String subArg : arg.getValues()) {
+        for (GameArgument arg : javaArguments)
+        {
+            if (arg.shouldApply(environment, featureList))
+            {
+                for (String subArg : arg.getValues())
+                {
                     flags.add(substitutor.replace(subArg));
                 }
             }
         }
 
-        if (versionManifest.getLogging() != null) {
+        if (versionManifest.getLogging() != null)
+        {
             log.info("Logging config present, log4j2 bug likely mitigated");
 
             VersionManifest.LoggingConfig config = versionManifest.getLogging().getClient();
@@ -299,14 +368,18 @@ public class Runner implements Callable<Process>, ProgressObservable {
      *
      * @throws JsonProcessingException on error
      */
-    private void addJarArgs() throws JsonProcessingException {
+    private void addJarArgs() throws JsonProcessingException
+    {
         List<String> args = builder.getArgs();
 
         List<GameArgument> rawArgs = versionManifest.getArguments().getGameArguments();
         StrSubstitutor substitutor = new StrSubstitutor(getCommandSubstitutions());
-        for (GameArgument arg : rawArgs) {
-            if (arg.shouldApply(environment, featureList)) {
-                for (String subArg : arg.getValues()) {
+        for (GameArgument arg : rawArgs)
+        {
+            if (arg.shouldApply(environment, featureList))
+            {
+                for (String subArg : arg.getValues())
+                {
                     args.add(substitutor.replace(subArg));
                 }
             }
@@ -316,22 +389,26 @@ public class Runner implements Callable<Process>, ProgressObservable {
     /**
      * Add proxy arguments.
      */
-    private void addProxyArgs() {
+    private void addProxyArgs()
+    {
         List<String> args = builder.getArgs();
 
-        if (config.isProxyEnabled()) {
+        if (config.isProxyEnabled())
+        {
             String host = config.getProxyHost();
             int port = config.getProxyPort();
             String username = config.getProxyUsername();
             String password = config.getProxyPassword();
 
-            if (!Strings.isNullOrEmpty(host) && port > 0 && port < 65535) {
+            if (!Strings.isNullOrEmpty(host) && port > 0 && port < 65535)
+            {
                 args.add("--proxyHost");
                 args.add(config.getProxyHost());
                 args.add("--proxyPort");
                 args.add(String.valueOf(port));
 
-                if (!Strings.isNullOrEmpty(username)) {
+                if (!Strings.isNullOrEmpty(username))
+                {
                     builder.getArgs().add("--proxyUser");
                     builder.getArgs().add(username);
                     builder.getArgs().add("--proxyPass");
@@ -344,14 +421,17 @@ public class Runner implements Callable<Process>, ProgressObservable {
     /**
      * Add server arguments.
      */
-    private void addServerArgs() {
+    private void addServerArgs()
+    {
         List<String> args = builder.getArgs();
 
-        if (config.isServerEnabled()) {
+        if (config.isServerEnabled())
+        {
             String host = config.getServerHost();
             int port = config.getServerPort();
 
-            if (!Strings.isNullOrEmpty(host) && port > 0 && port < 65535) {
+            if (!Strings.isNullOrEmpty(host) && port > 0 && port < 65535)
+            {
                 args.add("--server");
                 args.add(host);
                 args.add("--port");
@@ -363,10 +443,12 @@ public class Runner implements Callable<Process>, ProgressObservable {
     /**
      * Add window arguments.
      */
-    private void addWindowArgs() {
+    private void addWindowArgs()
+    {
         int width = config.getWindowWidth();
 
-        if (width >= 10) {
+        if (width >= 10)
+        {
             featureList.addFeature("has_custom_resolution", true);
         }
     }
@@ -374,16 +456,19 @@ public class Runner implements Callable<Process>, ProgressObservable {
     /**
      * Add arguments to make legacy Minecraft work.
      */
-    private void addLegacyArgs() {
+    private void addLegacyArgs()
+    {
         List<String> flags = builder.getFlags();
 
-        if (versionManifest.getMinimumLauncherVersion() < 21) {
+        if (versionManifest.getMinimumLauncherVersion() < 21)
+        {
             // Add bits that the legacy manifests don't
             flags.add("-Djava.library.path=" + extractDir.getAbsoluteFile());
             flags.add("-cp");
             flags.add(builder.buildClassPath());
 
-            if (featureList.hasFeature("has_custom_resolution")) {
+            if (featureList.hasFeature("has_custom_resolution"))
+            {
                 List<String> args = builder.getArgs();
                 args.add("--width");
                 args.add(String.valueOf(config.getWindowWidth()));
@@ -392,12 +477,14 @@ public class Runner implements Callable<Process>, ProgressObservable {
             }
 
             // Add old platform hacks that the new manifests already specify
-            if (getEnvironment().getPlatform() == Platform.WINDOWS) {
+            if (getEnvironment().getPlatform() == Platform.WINDOWS)
+            {
                 flags.add("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump");
             }
         }
 
-        if (versionManifest.getMinimumLauncherVersion() < 18) {
+        if (versionManifest.getMinimumLauncherVersion() < 18)
+        {
             // TODO find out exactly what versions need this hack.
             flags.add("-Dminecraft.applet.TargetDirectory=" + instance.getContentDir());
         }
@@ -409,7 +496,8 @@ public class Runner implements Callable<Process>, ProgressObservable {
      * @return the map of substitutions
      * @throws JsonProcessingException on error
      */
-    private Map<String, String> getCommandSubstitutions() throws JsonProcessingException {
+    private Map<String, String> getCommandSubstitutions() throws JsonProcessingException
+    {
         Map<String, String> map = new HashMap<String, String>();
 
         map.put("version_name", versionManifest.getId());
@@ -445,12 +533,14 @@ public class Runner implements Callable<Process>, ProgressObservable {
     }
 
     @Override
-    public double getProgress() {
+    public double getProgress()
+    {
         return progress.getProgress();
     }
 
     @Override
-    public String getStatus() {
+    public String getStatus()
+    {
         return progress.getStatus();
     }
 

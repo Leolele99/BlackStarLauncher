@@ -74,12 +74,7 @@ public class ConfigurationDialog extends JDialog {
         this.config = launcher.getConfig();
         mapper = new ObjectSwingMapper(config);
 
-        List<JavaRuntime> javaRuntimesTemp = JavaRuntimeFinder.getAvailableRuntimes();
-        //JavaRuntime javaRuntime = JavaRuntimeFinder.getRuntimeFromPath(launcher.getJavaDir().getAbsolutePath());
-        JavaRuntime javaRuntime = new JavaRuntime(Paths.get(launcher.getJavaDir().getAbsolutePath()).toFile(), "Bundled (17.0.2)", true);
-        javaRuntime.setMinecraftBundled(true);
-        javaRuntimesTemp.add(0, javaRuntime);
-        JavaRuntime[] javaRuntimes = javaRuntimesTemp.toArray(new JavaRuntime[0]);
+        JavaRuntime[] javaRuntimes = JavaRuntimeFinder.getAvailableRuntimes().toArray(new JavaRuntime[0]);
         DefaultComboBoxModel<JavaRuntime> model = new DefaultComboBoxModel<>(javaRuntimes);
 
         // Put the runtime from the config in the model if it isn't
